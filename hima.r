@@ -11,7 +11,7 @@ source("../config.r")
 #date="20170416212000"
 
 ttime = Sys.time()
-ttime = as.POSIXct(format(ttime,tz="UTC"),tz="UTC")-15*60 - (5*60*60)
+ttime = as.POSIXct(format(ttime,tz="UTC"),tz="UTC")-15*60 
 last10 = paste0(substr(format(ttime,"%M"),1,1),"0")
 date = paste0(format(ttime,"%Y%m%d%H"),last10)
 
@@ -142,7 +142,7 @@ system2(cmd,args)
 
 if(sum(is.na(values(t1)))<100000){
 	cmd=paste0(exeroot,"gdal2tiles.py")
-	args=c("hima/stack_vis.tif","-a 255,255,255","-z 5-11",sprintf("tiles/hima_%s_vis",date))
+	args=c("hima/stack_vis.tif","-a 255,255,255,255","-z 5-11",sprintf("tiles/hima_%s_vis",date))
 	system2(cmd,args)
 }
 
