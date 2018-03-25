@@ -11,7 +11,7 @@ source("../config.r")
 #date="20170416212000"
 
 ttime = Sys.time()
-ttime = as.POSIXct(format(ttime,tz="UTC"),tz="UTC")-15*60 
+ttime = as.POSIXct(format(ttime,tz="UTC"),tz="UTC")-15*60 - (2.5*60*60)
 last10 = paste0(substr(format(ttime,"%M"),1,1),"0")
 date = paste0(format(ttime,"%Y%m%d%H"),last10)
 
@@ -136,26 +136,28 @@ writeRaster(IR,"hima/stack_IR.tif",overwrite=TRUE,datatype="INT1U")
 
 unlink(paste0(working,c("bandb.nc","bandct.nc","bandg.nc","bandir.nc","bandr.nc","temp.tif","bandb.tif","bandct.tif","bandg.tif","bandir.tif",  "bandr.tif")))
 
-cmd=paste0(exeroot,"gdal_edit.py")
+cmd=paste0(gsub("\\\\",'\\',exeroot,fixed=TRUE),"gdal_edit.py")
 args=c("-unsetnodata","hima/stack_vis.tif")
 system2(cmd,args)
 
-if(sum(is.na(values(t1)))<100000){
-	cmd=paste0(exeroot,"gdal2tiles.py")
+if(sum(is.na(values(t1)))<500000){
+	
+  cmd=paste0(gsub("\\\\",'\\',exeroot,fixed=TRUE),"gdal2tiles.py")
 	args=c("hima/stack_vis.tif","-a 255,255,255,255","-z 5-11",sprintf("tiles/hima_%s_vis",date))
-	system2(cmd,args)
+	system2(cmd)
+
 }
 
 # Expand indexed tif to a rgba vrt
-cmd=paste0(exeroot,"gdal_translate")
+cmd=paste0(gsub("\\\\",'\\',exeroot,fixed=TRUE),"gdal_translate")
 args=c("-of vrt","-expand rgba","hima/stack_IR.tif","hima/stack_IR.vrt")
 system2(cmd,args)
 
-cmd=paste0(exeroot,"gdal_edit.py")
+cmd=paste0(gsub("\\\\",'\\',exeroot,fixed=TRUE),"gdal_edit.py")
 args=c("-unsetnodata","hima/stack_IR.vrt")
 system2(cmd,args)
 
-cmd=paste0(exeroot,"gdal2tiles.py")
+cmd=paste0(gsub("\\\\",'\\',exeroot,fixed=TRUE),"gdal2tiles.py")
 args=c("hima/stack_IR.vrt","-a 1","-z 5-11",sprintf("tiles/hima_%s_IR",date))
 system2(cmd,args)
 

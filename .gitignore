@@ -2,6 +2,7 @@ tiles/
 radar/*.tif
 radar/*.vrt
 hima/*.tif
+hima/stack_vis.tif
 hima/*.vrt
 hima/*.nc
 .Rproj.user
