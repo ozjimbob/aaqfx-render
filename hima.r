@@ -142,7 +142,7 @@ system2(cmd,args)
 
 if(sum(is.na(values(t1)))<100000){
 	cmd=paste0(exeroot,"gdal2tiles.py")
-	args=c("hima/stack_vis.tif","-a 255,255,255","-z 5-11",sprintf("tiles/hima_%s_vis",date))
+	args=c("hima/stack_vis.tif","-a 255,255,255,255","-z 5-11",sprintf("tiles/hima_%s_vis",date))
 	system2(cmd,args)
 }
 
