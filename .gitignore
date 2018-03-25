@@ -3,5 +3,7 @@ radar/*.tif
 radar/*.vrt
 hima/*.tif
 hima/*.vrt
+hima/*.nc
 .Rproj.user
 *.Rproj
+.Rhistory
