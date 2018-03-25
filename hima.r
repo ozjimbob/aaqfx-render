@@ -136,7 +136,7 @@ writeRaster(IR,"hima/stack_IR.tif",overwrite=TRUE,datatype="INT1U")
 
 unlink(paste0(working,c("bandb.nc","bandct.nc","bandg.nc","bandir.nc","bandr.nc","temp.tif","bandb.tif","bandct.tif","bandg.tif","bandir.tif",  "bandr.tif")))
 
-cmd=paste0(exroot,"gdal_edit.py")
+cmd=paste0(exeroot,"gdal_edit.py")
 args=c("-unsetnodata","hima/stack_vis.tif")
 system2(cmd,args)
 
