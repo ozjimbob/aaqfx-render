@@ -3,3 +3,5 @@ radar/*.tif
 radar/*.vrt
 hima/*.tif
 hima/*.vrt
+.Rproj.user
+*.Rproj

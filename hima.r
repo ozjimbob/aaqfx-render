@@ -11,7 +11,7 @@ source("../config.r")
 #date="20170416212000"
 
 ttime = Sys.time()
-ttime = as.POSIXct(format(ttime,tz="UTC"),tz="UTC")-15*60
+ttime = as.POSIXct(format(ttime,tz="UTC"),tz="UTC")-15*60 - (5*60*60)
 last10 = paste0(substr(format(ttime,"%M"),1,1),"0")
 date = paste0(format(ttime,"%Y%m%d%H"),last10)
 
@@ -33,23 +33,25 @@ url_root = sprintf("ftp://ftp-reg.cloud.bom.gov.au/gms/IDE00221.%s.nc",date)
 fn = getBinaryURL(url_root,userpwd=bompwd)
 writeBin(fn, paste0(working,"bandir.nc"))
 
-run1 = sprintf('/usr/bin/gdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandb.nc %stemp.tif',working,working)
-run2 = sprintf('/usr/bin/gdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandb.tif',working,working)
+run1 = sprintf('%sgdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandb.nc %stemp.tif',exeroot,working,working)
+run2 = sprintf('%sgdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandb.tif',exeroot,working,working)
 system(run1)
 system(run2)
 
-run1 = sprintf('/usr/bin/gdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandg.nc %stemp.tif',working,working)
-run2 = sprintf('/usr/bin/gdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandg.tif',working,working)
+
+
+run1 = sprintf('%sgdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandg.nc %stemp.tif',exeroot,working,working)
+run2 = sprintf('%sgdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandg.tif',exeroot,working,working)
 system(run1)
 system(run2)
 
-run1 = sprintf('/usr/bin/gdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandr.nc %stemp.tif',working,working)
-run2 = sprintf('/usr/bin/gdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandr.tif',working,working)
+run1 = sprintf('%sdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandr.nc %stemp.tif',exeroot,working,working)
+run2 = sprintf('%sgdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandr.tif',exeroot,working,working)
 system(run1)
 system(run2)
 
-run1 = sprintf('/usr/bin/gdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandir.nc %stemp.tif',working,working)
-run2 = sprintf('/usr/bin/gdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandir.tif',working,working)
+run1 = sprintf('%sgdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandir.nc %stemp.tif',exeroot,working,working)
+run2 = sprintf('%sgdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandir.tif',exeroot,working,working)
 system(run1)
 system(run2)
 
@@ -106,8 +108,8 @@ url_root = sprintf("ftp://ftp-reg.cloud.bom.gov.au/gms/IDE00213.%s.nc",date)
 fn = getBinaryURL(url_root,userpwd=bompwd)
 writeBin(fn, paste0(working,"bandct.nc"))
 
-run1 = sprintf('/usr/bin/gdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandct.nc %stemp.tif',working,working)
-run2 = sprintf('/usr/bin/gdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandct.tif',working,working)
+run1 = sprintf('%sgdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandct.nc %stemp.tif',exeroot,working,working)
+run2 = sprintf('%sgdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandct.tif',exeroot,working,working)
 system(run1)
 system(run2)
 
@@ -134,27 +136,27 @@ writeRaster(IR,"hima/stack_IR.tif",overwrite=TRUE,datatype="INT1U")
 
 unlink(paste0(working,c("bandb.nc","bandct.nc","bandg.nc","bandir.nc","bandr.nc","temp.tif","bandb.tif","bandct.tif","bandg.tif","bandir.tif",  "bandr.tif")))
 
-cmd="/usr/bin/gdal_edit.py"
+cmd=paste0(exroot,"gdal_edit.py")
 args=c("-unsetnodata","hima/stack_vis.tif")
 system2(cmd,args)
 
-if(sum(is.na(values(t1))<1000000){
-	cmd="/usr/bin/gdal2tiles.py"
+if(sum(is.na(values(t1)))<100000){
+	cmd=paste0(exeroot,"gdal2tiles.py")
 	args=c("hima/stack_vis.tif","-a 255,255,255","-z 5-11",sprintf("tiles/hima_%s_vis",date))
 	system2(cmd,args)
 }
 
 # Expand indexed tif to a rgba vrt
-cmd="/usr/bin/gdal_translate"
+cmd=paste0(exeroot,"gdal_translate")
 args=c("-of vrt","-expand rgba","hima/stack_IR.tif","hima/stack_IR.vrt")
 system2(cmd,args)
 
-cmd="/usr/bin/gdal_edit.py"
+cmd=paste0(exeroot,"gdal_edit.py")
 args=c("-unsetnodata","hima/stack_IR.vrt")
 system2(cmd,args)
 
-cmd="/usr/bin/gdal2tiles.py"
-args=c("hima/stack_IR.vrt","-a 1,2,3,4","-z 5-11",sprintf("tiles/hima_%s_IR",date))
+cmd=paste0(exeroot,"gdal2tiles.py")
+args=c("hima/stack_IR.vrt","-a 1","-z 5-11",sprintf("tiles/hima_%s_IR",date))
 system2(cmd,args)
 
 unlink(paste0(working,c("stack_IR.tif","stack_vis.tif","stack_IR.vrt")))
