@@ -210,11 +210,11 @@ writeRaster(grid_layer,sprintf("radar/rad%s_%s.tif",fdate,this_rad),overwrite=TR
 
 
 # Expand indexed tif to a rgba vrt
-cmd="/usr/bin/gdal_translate"
+cmd=paste0(exeroot,"gdal_translate")
 args=c("-of vrt","-expand rgba",sprintf("radar/rad%s_%s.tif",fdate,this_rad),sprintf("radar/rad%s_%s.vrt",fdate,this_rad))
 system2(cmd,args)
 
-cmd="/usr/bin/gdal2tiles.py"
+cmd=paste0(exeroot,"gdal2tiles.py")
 args=c(sprintf("radar/rad%s_%s.vrt",fdate,this_rad),"-a 0,0,0,0","-z 5-11",sprintf("tiles/rad_%s_%s",fdate,this_rad))
 system2(cmd,args)
 
