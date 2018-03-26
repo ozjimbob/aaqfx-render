@@ -43,7 +43,7 @@ run2 = sprintf('%sgdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS8
 system(run1)
 system(run2)
 
-run1 = sprintf('%sdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandr.nc %stemp.tif',exeroot,working,working)
+run1 = sprintf('%sgdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandr.nc %stemp.tif',exeroot,working,working)
 run2 = sprintf('%sgdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandr.tif',exeroot,working,working)
 system(run1)
 system(run2)
