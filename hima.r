@@ -11,7 +11,7 @@ source("../config.r")
 #date="20170416212000"
 
 ttime = Sys.time()
-ttime = as.POSIXct(format(ttime,tz="UTC"),tz="UTC")-15*60 - (2.5*60*60)
+ttime = as.POSIXct(format(ttime,tz="UTC"),tz="UTC")-15*60 
 last10 = paste0(substr(format(ttime,"%M"),1,1),"0")
 date = paste0(format(ttime,"%Y%m%d%H"),last10)
 
@@ -37,8 +37,6 @@ run1 = sprintf('%sgdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=
 run2 = sprintf('%sgdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandb.tif',exeroot,working,working)
 system(run1)
 system(run2)
-
-
 
 run1 = sprintf('%sgdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandg.nc %stemp.tif',exeroot,working,working)
 run2 = sprintf('%sgdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandg.tif',exeroot,working,working)
