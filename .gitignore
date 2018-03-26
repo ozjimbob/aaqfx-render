@@ -3,6 +3,7 @@ radar/*.tif
 radar/*.vrt
 hima/*.tif
 hima/stack_vis.tif
+hima/stack*
 hima/*.vrt
 hima/*.nc
 .Rproj.user
