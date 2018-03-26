@@ -123,8 +123,9 @@ values(IR) = ir2
 IR = disaggregate(IR,2,"bilinear")
 # Define colour ramp
 
-IR = 255-IR
-values(IR)[values(IR)>254]-254
+#IR = 255-IR
+values(IR)[values(IR)>254]=254
+values(IR)[values(IR)<2]=2
 IR = stack(IR,IR,IR)
 
 # Set colortable
