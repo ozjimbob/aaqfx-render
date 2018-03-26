@@ -122,11 +122,11 @@ values(IR) = ir2
 
 IR = disaggregate(IR,2,"bilinear")
 # Define colour ramp
-colv = colorRampPalette(c("black","grey60","white"),1)(256)
 
-# Set colortable
-colortable(IR)=colv
-values(IR)[values(IR)<3]=3
+IR = 255-IR
+values(IR)[values(IR)>254]-254
+IR = stack(IR,IR,IR)
+
 # Set colortable
 
 writeRaster(IR,"hima/stack_IR.tif",overwrite=TRUE,datatype="INT1U")
@@ -146,17 +146,18 @@ if(sum(is.na(values(t1)))<500000){
 
 }
 
+
 # Expand indexed tif to a rgba vrt
-cmd=paste0(gsub("\\\\",'\\',exeroot,fixed=TRUE),"gdal_translate")
-args=c("-of vrt","-expand rgba","hima/stack_IR.tif","hima/stack_IR.vrt")
-system2(cmd,args)
+#cmd=paste0(gsub("\\\\",'\\',exeroot,fixed=TRUE),"gdal_translate")
+#args=c("-of vrt","-expand rgba","hima/stack_IR.tif","hima/stack_IR.vrt")
+#system2(cmd,args)
 
 cmd=paste0(gsub("\\\\",'\\',exeroot,fixed=TRUE),"gdal_edit.py")
-args=c("-unsetnodata","hima/stack_IR.vrt")
+args=c("-unsetnodata","hima/stack_IR.tif")
 system2(cmd,args)
 
 cmd=paste0(gsub("\\\\",'\\',exeroot,fixed=TRUE),"gdal2tiles.py")
-args=c("hima/stack_IR.vrt","-a 1","-z 5-11",sprintf("tiles/hima_%s_IR",date))
+args=c("hima/stack_IR.tif","-a 255,255,255,255","-z 5-11",sprintf("tiles/hima_%s_IR",date))
 system2(cmd,args)
 
 unlink(paste0(working,c("stack_IR.tif","stack_vis.tif","stack_IR.vrt")))
