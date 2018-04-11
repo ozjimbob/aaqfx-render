@@ -21,5 +21,6 @@ file.rename(vtas,"aqfx/vtas.nc")
 file.rename(se,"aqfx/se.nc")
 file.rename(aus,"aqfx/aus.nc")
 
+source("proc_ncdf.r")
 
 

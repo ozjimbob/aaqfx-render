@@ -134,9 +134,9 @@ dimLat <- ncdim_def("lat","degrees_north",lats,longname="latitude")
 dimLon <- ncdim_def("lon","degrees_east",lons,longname="longitude")
   
 varPM25<- ncvar_def("PM25","ugm3",list(dimLon,dimLat,dimTime),longname="PM25 Concentration",prec="float")
-varOzone<- ncvar_def("Ozone","ppm",list(dimLon,dimLat,dimTime),longname="Ozone Concentration",prec="float")
-varLevo<- ncvar_def("Levo","ppm",list(dimLon,dimLat,dimTime),longname="Levoglucosan Concentration",prec="float")
-varAOD<- ncvar_def("AOD","none",list(dimLon,dimLat,dimTime),longname="Aerosol Optical Depth",prec="float")
+varOzone<- ncvar_def("Ozone","ppb",list(dimLon,dimLat,dimTime),longname="Ozone Concentration",prec="float")
+varLevo<- ncvar_def("Levo","ugm3",list(dimLon,dimLat,dimTime),longname="Levoglucosan Concentration",prec="float")
+varAOD<- ncvar_def("AOD","ExC",list(dimLon,dimLat,dimTime),longname="Aerosol Optical Depth",prec="float")
 
   
   
@@ -153,6 +153,12 @@ ncvar_put(new_file,varLevo,datLevo)
 ncvar_put(new_file,varAOD,datAOD)
 
 nc_close(new_file)
+ 
 
-cmd="cdo mergetime aqfx_done/vtas_*.nc aqfx_done/merge_vtas.nc"
+cmd="cdo -O mergetime aqfx_done/vtas_*.nc aqfx_done/merge_vtas.nc"
 system(cmd)
+
+source("../config.r")
+system(geopw)
+
+
