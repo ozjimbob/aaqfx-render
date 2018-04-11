@@ -9,3 +9,8 @@ hima/*.nc
 .Rproj.user
 *.Rproj
 .Rhistory
+aqfx/
+aqfx/*
+aqfx_done/
+aqfx_done/*
+
