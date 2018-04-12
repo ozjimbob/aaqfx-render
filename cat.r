@@ -2,6 +2,7 @@
 library(tidyverse)
 library(rjson)
 
+
 fl = list.files("tiles")
 
 of = list()
@@ -95,3 +96,9 @@ ol2 = c(ol2,ol3)
 out=toJSON(as.list(ol2))
 cat(out,file="tiles/layers.json")
 
+library(ncdf4)
+data = nc_open("aqfx_done/merge_vtas.nc")
+tl=ncvar_get(data,"time")
+tl=format(as.POSIXct(tl,origin="1970-1-1 00:00:00",tz="UTC"),format="%Y-%m-%d %H:%M:%S")
+out=toJSON(tl)
+cat(out,file="tiles/aqfx_times.json")
