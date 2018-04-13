@@ -113,10 +113,10 @@ file.rename("aqfx_done/vtas_07.nc","aqfx_done/vtas_06.nc")
 
 
 #PM25
-datPM25 = cube_met(data,"PM25")[,,2:25]
-datOzone = cube_met(data,"Ozone")[,,2:25]
-datLevo = cube_met(data,"Levo")[,,2:25]
-datAOD = cube_met(data,"AOD")[,,2:25]
+datPM25 = cube_met(data,"PM25")[,,1:24]
+datOzone = cube_met(data,"Ozone")[,,1:24]
+datLevo = cube_met(data,"Levo")[,,1:24]
+datAOD = cube_met(data,"AOD")[,,1:24]
 
 
 times = 0:23
