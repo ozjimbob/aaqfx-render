@@ -28,7 +28,14 @@ db_raw$smell_smoke=as.character(db_raw$smell_smoke)
 db_raw$see_smoke=as.character(db_raw$see_smoke)
 db_raw$picture=as.character(db_raw$picture)
 db_raw = st_as_sf(db_raw,coords=c("lng","lat"),crs=4326)
-write_sf(db_raw,"tiles/smoke_raw_points.geojson",delete_dsn = TRUE)
+
+
+if(!is.null(db_raw)){
+  write_sf(db_raw,"tiles/smoke_raw_points.geojson",delete_dsn = TRUE)
+}else{
+  cat("",file="tiles/smoke_raw_points.geojson")
+}
+
 
 
 db_dat$created_at = as.POSIXct(format(db_dat$created_at,"%Y-%m-%d %H:%M:%S"),tz="GMT")
@@ -39,7 +46,7 @@ dat_local = db_dat %>% filter(created_at > startTime & created_at < endTime & lo
 
 # Define array of start- and end- times for moving window analysis
 start_array = seq(startTime,endTime,15*60)
-end_array = start_array + 30*60
+end_array = start_array + 60*60
 
 # PolygonList
 polygon_list = list()
@@ -200,6 +207,21 @@ all_vector = do.call(rbind,vector_list)
 point_list = compact(point_list)
 all_points = do.call(rbind,point_list)
 
-write_sf(all_poly,"tiles/smoke_poly.geojson",delete_dsn=TRUE)
-write_sf(all_vector,"tiles/smoke_lines.geojson",delete_dsn=TRUE)
-write_sf(all_points,"tiles/smoke_points.geojson",delete_dsn=TRUE)
+if(!is.null(all_poly)){
+ write_sf(all_poly,"tiles/smoke_poly.geojson",delete_dsn=TRUE)
+}else{
+  cat("",file="tiles/smoke_poly.geojson")
+}
+
+if(!is.null(all_vector)){
+  write_sf(all_vector,"tiles/smoke_lines.geojson",delete_dsn=TRUE)
+}else{
+  cat("",file="tiles/smoke_lines.geojson")
+}
+
+if(!is.null(all_points)){
+  write_sf(all_points,"tiles/smoke_points.geojson",delete_dsn=TRUE)
+}else{
+  cat("",file="tiles/smoke_points.geojson")
+}
+
