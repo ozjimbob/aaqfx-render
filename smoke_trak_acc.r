@@ -23,7 +23,7 @@ startTime = endTime-24*60*60*7
 db_dat = dbGetQuery(con_prod,"select * from smoke_reports")
 
 
-db_raw = dplyr::select(db_dat,id,lat,lng,created_at,location_type,smoke_intensity,smell_intensity,smell_smoke,see_smoke,picture,alpha)
+db_raw = dplyr::select(db_dat,id,lat,lng,created_at,location_type,smoke_intensity,smell_intensity,smell_smoke,see_smoke,picture,alpha,alpha_accuracy)
 db_raw$smell_smoke=as.character(db_raw$smell_smoke)
 db_raw$see_smoke=as.character(db_raw$see_smoke)
 db_raw$picture=as.character(db_raw$picture)
