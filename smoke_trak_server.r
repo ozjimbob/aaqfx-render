@@ -18,12 +18,10 @@ md = raster("mag/D_Grid_mf_2020.grd")
 #* @post /get_poly
 get_poly = function(bbox,startTime,endTime){
  print(bbox) 
-# bbox = c(146.88,147.578892,-43.3346,-42.835)
-  #print(bbox)
+
   startTime = as.POSIXct(startTime)
   endTime = as.POSIXct(endTime)
-  #print(startTime)
-  #print(endTime)
+
   lat = bbox[c(3,4)]
   lng = bbox[c(1,2)]
   db_dat = dbGetQuery(con_prod,sprintf("select * from smoke_reports where lng > %f and lng < %f and lat > %f and lat < %f",lng[1],lng[2],lat[1],lat[2]))
@@ -190,3 +188,115 @@ get_poly = function(bbox,startTime,endTime){
   }
  
  
+#* @post /get_poly_dist
+get_poly_dist = function(bbox,startTime,endTime){
+  print(bbox) 
+  
+  startTime = as.POSIXct(startTime)
+  endTime = as.POSIXct(endTime)
+  
+  lat = bbox[c(3,4)]
+  lng = bbox[c(1,2)]
+  db_dat = dbGetQuery(con_prod,sprintf("select * from smoke_reports where lng > %f and lng < %f and lat > %f and lat < %f",lng[1],lng[2],lat[1],lat[2]))
+  
+  
+  db_dat2 = filter(db_dat,created_at >= startTime & created_at <= endTime & location_type=="dist" & !is.na(alpha))
+  dat_local = db_dat %>% filter(created_at > startTime & created_at < endTime & location_type=="atl" & see_smoke == TRUE)
+  db_raw = dplyr::select(db_dat2,id,lat,lng,created_at,location_type,smoke_intensity,smell_intensity,smell_smoke,see_smoke,picture,alpha,alpha_accuracy)
+  db_raw$smell_smoke=as.character(db_raw$smell_smoke)
+  db_raw$see_smoke=as.character(db_raw$see_smoke)
+  db_raw$picture=as.character(db_raw$picture)
+  
+  if(is.null(db_raw)){return("None") }
+  
+  
+  # Define array of start- and end- times for moving window analysis
+  start_array = seq(startTime,endTime,15*60)
+  end_array = start_array + 60*60
+  
+  data = dplyr::select(db_raw,created_at, id,lat,lng,alpha,alpha_accuracy)
+  if(nrow(data)<2){return("Too Few Points")}
+  data$alpha_accuracy[is.na(data$alpha_accuracy)] = 15
+  
+  data$alpha = data$alpha - 360
+  
+  data$ang = data$alpha * pi/180
+  data$width = data$alpha_accuracy * pi/180
+  
+  data$focx = dat$lng + .2*sin(dat$ang)
+  data$focy = dat$lat + .2*cos(dat$ang)
+  
+  r=raster(nrows=100,ncols=100,xmn=lng[1],xmx=lng[2],ymn=lat[1],ymx=lat[2])
+  
+  
+  # Raster coordinate systems work from top-left not bottom left
+  # So best to reference cells by their coordinates rather than mattrix position
+  xcoords = unique(coordinates(r)[,1])
+  ycoords = unique(coordinates(r)[,2])
+  
+  # For each cell in raster
+  for(x in xcoords){
+    for(y in ycoords){
+      # Maintain total for cell
+      td=0
+      # For each point in our table
+      for(i in 1:nrow(data)){
+        # Select the point
+        thisdat = data[i,]
+        
+        # Grab the site, focal and angle data from the table
+        focal=c(thisdat$focx,thisdat$focy)
+        site = c(thisdat$lng,thisdat$lat)
+        ang = thisdat$ang
+        width = thisdat$width
+        
+        # Calculate distance from cell to focal point
+        d =  sqrt((x-focal[1])^2 + (y-focal[2])^2) 
+        # Calculate angle from cell to the photo site
+        a = atan2(x-site[1],y-site[2])
+        # Angular difference between our cell angle and the angle camera is pointing
+        ad = abs(a-ang)
+        # 0.26 = 15 degrees.  Angles greater than 15 degrees (FOV) we can ignore
+        if(ad>width){ad=width}
+        # Invert it - we want close value to be high rather than distance
+        ad=width-ad
+        # Similarly ignore distances greater than 20 units     
+        if(d>20){d=20}
+        # Invert this as well, so distances close to the focal point are high
+        d=20-d
+        # "Probability" is distance * angular difference.  
+        # If you're close to the focal point, and not too far off-angle, you get a high score
+        d=ad^2*d*(1/width^1.5)
+        # Add to tally
+        td=td+d
+      }
+      # Work out what raster cell to put our answer in based on these coordinates
+      cno = cellFromXY(r,c(x,y))
+      # Write to raster
+      r[cno]=td
+    }
+  }
+  
+  
+  q=quantile(r,.95)
+  
+  # Copy the raster
+  trast = r
+  
+  # Set values of this raster where original raster is more than quantile value
+  values(trast)[values(rast)>q]=1
+  values(trast)[values(rast)<=q]=NA
+  
+  # Plot classified raster
+  #tm_shape(comb,is.master = TRUE) + tm_lines(alpha=0) + tm_shape(trast) + tm_raster(palette="YlOrRd",title="KDE") + tm_shape(vic) + tm_borders()  + tm_shape(roads,col="black",alpha=0.5) + tm_lines() + tm_layout(title = "Threshold Density")
+  orast = rasterToPolygons(trast,dissolve=TRUE)
+  orast = st_as_sf(orast, crs="+proj=aea +lat_1=-18 +lat_2=-36 +lat_0=0 +lon_0=134 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ")
+  orast = st_transform(orast,crs=4326)
+  orast=st_buffer(orast,.000000001)
+  orast$created_at = startTime
+  out_polygon=orast
+  if(nrow(orast)==0){return("No Polygons")}
+  out_polygon = as(out_polygon,"Spatial")
+  return(as.geojson(out_polygon))
+}
+
