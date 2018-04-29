@@ -8,7 +8,7 @@ library(geosphere) # Calculate distances/bearings on a sphere
 library(raster) # Raster files
 library(RPostgres)
 library(DBI)
-
+library(geojson)
 
 #setwd("/mnt/R")
 source("../config.r")
@@ -16,13 +16,14 @@ source("../config.r")
 md = raster("mag/D_Grid_mf_2020.grd")
 
 #* @post /get_poly
-get_poly = function(startTime,endTime,bbox){
- # bbox = c(146.88,147.578892,-43.3346,-42.835)
-  print(bbox)
+get_poly = function(bbox,startTime,endTime){
+ print(bbox) 
+# bbox = c(146.88,147.578892,-43.3346,-42.835)
+  #print(bbox)
   startTime = as.POSIXct(startTime)
   endTime = as.POSIXct(endTime)
-  print(startTime)
-  print(endTime)
+  #print(startTime)
+  #print(endTime)
   lat = bbox[c(3,4)]
   lng = bbox[c(1,2)]
   db_dat = dbGetQuery(con_prod,sprintf("select * from smoke_reports where lng > %f and lng < %f and lat > %f and lat < %f",lng[1],lng[2],lat[1],lat[2]))
@@ -185,7 +186,7 @@ get_poly = function(startTime,endTime,bbox){
     out_polygon=orast
     if(nrow(orast)==0){return("No Polygons")}
     out_polygon = as(out_polygon,"Spatial")
-    return(oo)
+    return(as.geojson(out_polygon))
   }
  
  
