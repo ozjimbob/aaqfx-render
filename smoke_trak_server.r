@@ -499,7 +499,7 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
     values(trast)[values(r)<=q1]=NA
     
   }
-  if(all(is.na(raster::values(orast)))){
+  if(all(is.na(raster::values(trast)))){
     return("Empty raster")
   }
   orast = rasterToPolygons(trast,dissolve=TRUE)
