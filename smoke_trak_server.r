@@ -342,7 +342,7 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
     
     from_data = st_as_sf(data,coords=c("lng","lat"),crs=4326)
     
-    dp = destPoint(cbind(data$lng,data$lat),data$angle,25000)
+    dp = destPoint(cbind(data$lng,data$lat),data$angle,distance * 110000)
     
     # Replace the lat/longs in this copy of input dataset with these coordinates
     to_points$lng = dp[,1]
