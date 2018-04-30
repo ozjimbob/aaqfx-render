@@ -190,10 +190,12 @@ get_poly = function(bbox,startTime,endTime){
  
 #* @post /get_poly_dist
 get_poly_dist = function(bbox,startTime,endTime){
-  print(bbox) 
-  
+  #print(bbox) 
+  #bbox=c(146.76,148.00000,-43.33,-42.65)
   startTime = as.POSIXct(startTime)
   endTime = as.POSIXct(endTime)
+  #startTime = as.POSIXct("2018-04-26 00:00:00")
+  #endTime = as.POSIXct("2018-04-30 10:00:00")
   
   lat = bbox[c(3,4)]
   lng = bbox[c(1,2)]
@@ -218,13 +220,14 @@ get_poly_dist = function(bbox,startTime,endTime){
   if(nrow(data)<2){return("Too Few Points")}
   data$alpha_accuracy[is.na(data$alpha_accuracy)] = 15
   
-  data$alpha = data$alpha - 360
+  
+  data$alpha[data$alpha>180] = data$alpha[data$alpha>180] - 360
   
   data$ang = data$alpha * pi/180
   data$width = data$alpha_accuracy * pi/180
   
-  data$focx = dat$lng + .2*sin(dat$ang)
-  data$focy = dat$lat + .2*cos(dat$ang)
+  data$focx = data$lng + .2*sin(data$ang)
+  data$focy = data$lat + .2*cos(data$ang)
   
   r=raster(nrows=100,ncols=100,xmn=lng[1],xmx=lng[2],ymn=lat[1],ymx=lat[2])
   
@@ -261,9 +264,9 @@ get_poly_dist = function(bbox,startTime,endTime){
         # Invert it - we want close value to be high rather than distance
         ad=width-ad
         # Similarly ignore distances greater than 20 units     
-        if(d>20){d=20}
+        if(d>.2){d=.2}
         # Invert this as well, so distances close to the focal point are high
-        d=20-d
+        d=.2-d
         # "Probability" is distance * angular difference.  
         # If you're close to the focal point, and not too far off-angle, you get a high score
         d=ad^2*d*(1/width^1.5)
@@ -278,14 +281,15 @@ get_poly_dist = function(bbox,startTime,endTime){
   }
   
   
-  q=quantile(r,.95)
-  
+  q1=nrow(data)/100
+  q=q1*2
   # Copy the raster
   trast = r
   
   # Set values of this raster where original raster is more than quantile value
-  values(trast)[values(rast)>q]=1
-  values(trast)[values(rast)<=q]=NA
+  values(trast)[values(r)>q1]=1
+  values(trast)[values(r)>q]=2
+  values(trast)[values(r)<=q1]=NA
   
   # Plot classified raster
   #tm_shape(comb,is.master = TRUE) + tm_lines(alpha=0) + tm_shape(trast) + tm_raster(palette="YlOrRd",title="KDE") + tm_shape(vic) + tm_borders()  + tm_shape(roads,col="black",alpha=0.5) + tm_lines() + tm_layout(title = "Threshold Density")
