@@ -307,10 +307,190 @@ get_poly_dist = function(bbox,startTime,endTime){
 
 
 #* @post /gen_poly_dist
-gen_poly = function(algorithm,distance=25,angle=15,defaultAccuracy=10,points){
+gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,points){
   print(algorithm)
-  print(distance)
-  print(angle)
-  print(points)
-  return("okay")
+  # Quick convert km to degres
+  distance = distance/110
+  
+  if(algorithm==1){
+    data=points
+    data$alpha_accuracy[is.na(data$alpha_accuracy)] = defaultAccuracy
+    data$angle[is.na(data$angle)] = defaultAngle
+    data_left = data
+    data_right = data
+    data_left$side = "left"
+    data_right$side = "right"
+    data_left$alpha = data_left$angle+data_left$alpha_accuracy*.75
+    data_right$alpha = data_right$angle-data_right$alpha_accuracy*.75
+    data$side = "mid"
+    data = rbind(data_left,data_right,data)
+    
+    from_data = st_as_sf(data,coords=c("lng","lat"),crs=4326)
+    
+    to_points = data
+    
+    ex_mat = st_coordinates(from_data)
+    mDelta = extract(md,ex_mat)
+    data$angle = data$angle + mDelta
+    
+    # This function takes lat/longs, a bearing, and a distance in m, and returns the end locations of each vector
+    sp = destPoint(cbind(data$lng,data$lat),data$alpha,500)
+    data$lng = sp[,1]
+    data$lat = sp[,2]
+    
+    from_data = st_as_sf(data,coords=c("lng","lat"),crs=4326)
+    
+    dp = destPoint(cbind(data$lng,data$lat),data$alpha,25000)
+    
+    # Replace the lat/longs in this copy of input dataset with these coordinates
+    to_points$lng = dp[,1]
+    to_points$lat = dp[,2]
+    
+    # Convert these end points to a spatial object
+    to_data = st_as_sf(to_points,coords=c("lng","lat"),crs=4326)
+    
+    # We need some unique IDs for the start and end point data frames
+    # so they can be grouped together into lines
+    from_data$idx = seq_along(from_data$alpha)
+    to_data$idx = seq_along(to_data$alpha)
+    
+    # Join the two data frames into one
+    comb = rbind(from_data,to_data)
+    combx = filter(comb,side=="mid")
+    
+    # Group by ID, cast the resulting point groups as spatial lines
+    comb = group_by(comb,idx) %>% summarise() %>% st_cast("LINESTRING")
+    combx = group_by(combx,created_at,id) %>% summarise() %>% st_cast("LINESTRING")
+    
+    vector_list = combx
+    
+    # Calculate intersection of all vectors
+    line_is = st_intersection(comb,comb)
+    
+    # This gave us ALL intersections - both intersection points, and the lines they sit on
+    # So keep only the geometries that are points
+    line_is = line_is[st_geometry_type(line_is)=="POINT",]
+    line_is=st_difference(line_is)
+    line_is$idx = NULL
+    line_is$idx.1 = NULL
+    
+    if(nrow(line_is)==0){return("No Line Intersections") }
+    
+    
+    if(nrow(line_is)<2){return("Too Few Intersection") }
+    
+    line_is = st_transform(line_is,crs="+proj=aea +lat_1=-18 +lat_2=-36 +lat_0=0 +lon_0=134 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ")
+    
+    # Calculate a kernel density raster with a 3km bandwidth
+    sm = smooth_map(line_is,bandwidth=2,to.Raster=TRUE,nrow=50,ncol=50)
+    rast = sm[[1]]
+    
+    # Plot this raster on the map of Melbourne
+    #tm_shape(comb,is.master = TRUE) + tm_lines(alpha=0) + tm_shape(rast) + tm_raster(palette="YlOrRd",title="KDE") + tm_shape(vic) + tm_borders()  + tm_shape(roads,col="black",alpha=0.5) + tm_lines() + tm_layout(title = "Intersection Kernel Density")
+    
+    # Find the 95th percentile of the raster value
+    # And classify a new raster with just those values present
+    # This is the bit that we will need real data to figure out if this is the best critera
+    # What if we have LOTS of plumes all over the place? Will a 95th percentile make some go missing?
+    # What if there is no smoke - will 95th percentile start highlighting smoke that isn't there?
+    # May need to identify a useful fixed density instead
+    
+    # Calculate 95th percentile value
+    q=quantile(rast,.95)
+    
+    # Copy the raster
+    trast = rast
+    
+    # Set values of this raster where original raster is more than quantile value
+    values(trast)[values(rast)>q]=1
+    values(trast)[values(rast)<=q]=NA
+    
+  }else{
+    data = points
+    
+    data$alpha_accuracy[is.na(data$alpha_accuracy)] = defaultAccuracy
+    data$angle[is.na(data$angle)] = defaultAngle
+    
+    
+    data$angle[data$angle>180] = data$angle[data$angle>180] - 360
+    
+    data$ang = data$angle * pi/180
+    data$width = data$alpha_accuracy * pi/180
+    
+    data$focx = data$lng + distance*sin(data$ang)
+    data$focy = data$lat + distance*cos(data$ang)
+    
+    r=raster(nrows=50,ncols=50,xmn=lng[1],xmx=lng[2],ymn=lat[1],ymx=lat[2])
+    
+    
+    # Raster coordinate systems work from top-left not bottom left
+    # So best to reference cells by their coordinates rather than mattrix position
+    xcoords = unique(coordinates(r)[,1])
+    ycoords = unique(coordinates(r)[,2])
+    
+    # For each cell in raster
+    for(x in xcoords){
+      for(y in ycoords){
+        # Maintain total for cell
+        td=0
+        # For each point in our table
+        for(i in 1:nrow(data)){
+          # Select the point
+          thisdat = data[i,]
+          
+          # Grab the site, focal and angle data from the table
+          focal=c(thisdat$focx,thisdat$focy)
+          site = c(thisdat$lng,thisdat$lat)
+          ang = thisdat$ang
+          width = thisdat$width
+          
+          # Calculate distance from cell to focal point
+          d =  sqrt((x-focal[1])^2 + (y-focal[2])^2) 
+          # Calculate angle from cell to the photo site
+          a = atan2(x-site[1],y-site[2])
+          # Angular difference between our cell angle and the angle camera is pointing
+          ad = abs(a-ang)
+          # 0.26 = 15 degrees.  Angles greater than 15 degrees (FOV) we can ignore
+          if(ad>width){ad=width}
+          # Invert it - we want close value to be high rather than distance
+          ad=width-ad
+          # Similarly ignore distances greater than 20 units     
+          if(d>.2){d=.2}
+          # Invert this as well, so distances close to the focal point are high
+          d=.2-d
+          # "Probability" is distance * angular difference.  
+          # If you're close to the focal point, and not too far off-angle, you get a high score
+          d=ad^2*d*(1/width^1.5)
+          # Add to tally
+          td=td+d
+        }
+        # Work out what raster cell to put our answer in based on these coordinates
+        cno = cellFromXY(r,c(x,y))
+        # Write to raster
+        r[cno]=td
+      }
+    }
+    
+    
+    q1=nrow(data)/100
+    q=q1*2
+    # Copy the raster
+    trast = r
+    
+    # Set values of this raster where original raster is more than quantile value
+    values(trast)[values(r)>q1]=1
+    values(trast)[values(r)>q]=2
+    values(trast)[values(r)<=q1]=NA
+    
+    }
+  orast = rasterToPolygons(trast,dissolve=TRUE)
+  orast = st_as_sf(orast, crs="+proj=aea +lat_1=-18 +lat_2=-36 +lat_0=0 +lon_0=134 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ")
+  orast = st_transform(orast,crs=4326)
+  orast=st_buffer(orast,.000000001)
+  orast$created_at = startTime
+  out_polygon=orast
+  if(nrow(orast)==0){return("No Polygons")}
+  out_polygon = as(out_polygon,"Spatial")
+  return(as.geojson(out_polygon))
+
 }
