@@ -490,7 +490,6 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
   orast = st_as_sf(orast, crs="+proj=aea +lat_1=-18 +lat_2=-36 +lat_0=0 +lon_0=134 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ")
   orast = st_transform(orast,crs=4326)
   orast=st_buffer(orast,.000000001)
-  orast$created_at = startTime
   out_polygon=orast
   if(nrow(orast)==0){return("No Polygons")}
   out_polygon = as(out_polygon,"Spatial")
