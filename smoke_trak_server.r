@@ -304,3 +304,13 @@ get_poly_dist = function(bbox,startTime,endTime){
   return(as.geojson(out_polygon))
 }
 
+
+
+#* @post /gen_poly_dist
+gen_poly = function(algorithm,distance=25,angle=15,defaultAccuracy=10,points){
+  print(algorithm)
+  print(distance)
+  print(angle)
+  print(points)
+  return("okay")
+}
