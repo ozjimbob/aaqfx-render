@@ -358,8 +358,7 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
     
     # Join the two data frames into one
     comb = rbind(from_data,to_data)
-    combx = filter(comb,side=="mid")
-    
+   
     # Group by ID, cast the resulting point groups as spatial lines
     comb = group_by(comb,idx) %>% summarise() %>% st_cast("LINESTRING")
 
