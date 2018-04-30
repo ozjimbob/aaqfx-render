@@ -307,7 +307,7 @@ get_poly_dist = function(bbox,startTime,endTime){
 
 
 #* @post /gen_poly_dist
-gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,points){
+gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,points,bbox){
   print(algorithm)
   # Quick convert km to degres
   distance = distance/110
@@ -407,6 +407,9 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
     
   }else{
     data = points
+    
+    lat = bbox[c(3,4)]
+    lng = bbox[c(1,2)]
     
     data$alpha_accuracy[is.na(data$alpha_accuracy)] = defaultAccuracy
     data$angle[is.na(data$angle)] = defaultAngle
