@@ -313,15 +313,17 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
   distance = distance/110
   
   if(algorithm==1){
+    
     data=points
     data$alpha_accuracy[is.na(data$alpha_accuracy)] = defaultAccuracy
     data$angle[is.na(data$angle)] = defaultAngle
+    
     data_left = data
     data_right = data
     data_left$side = "left"
     data_right$side = "right"
-    data_left$alpha = data_left$angle+data_left$alpha_accuracy*.75
-    data_right$alpha = data_right$angle-data_right$alpha_accuracy*.75
+    data_left$angle = data_left$angle+data_left$alpha_accuracy*.75
+    data_right$angle = data_right$angle-data_right$alpha_accuracy*.75
     data$side = "mid"
     data = rbind(data_left,data_right,data)
     
@@ -334,13 +336,13 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
     data$angle = data$angle + mDelta
     
     # This function takes lat/longs, a bearing, and a distance in m, and returns the end locations of each vector
-    sp = destPoint(cbind(data$lng,data$lat),data$alpha,500)
+    sp = destPoint(cbind(data$lng,data$lat),data$angle,500)
     data$lng = sp[,1]
     data$lat = sp[,2]
     
     from_data = st_as_sf(data,coords=c("lng","lat"),crs=4326)
     
-    dp = destPoint(cbind(data$lng,data$lat),data$alpha,25000)
+    dp = destPoint(cbind(data$lng,data$lat),data$angle,25000)
     
     # Replace the lat/longs in this copy of input dataset with these coordinates
     to_points$lng = dp[,1]
@@ -351,8 +353,8 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
     
     # We need some unique IDs for the start and end point data frames
     # so they can be grouped together into lines
-    from_data$idx = seq_along(from_data$alpha)
-    to_data$idx = seq_along(to_data$alpha)
+    from_data$idx = seq_along(from_data$angle)
+    to_data$idx = seq_along(to_data$angle)
     
     # Join the two data frames into one
     comb = rbind(from_data,to_data)
@@ -360,9 +362,7 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
     
     # Group by ID, cast the resulting point groups as spatial lines
     comb = group_by(comb,idx) %>% summarise() %>% st_cast("LINESTRING")
-    combx = group_by(combx,created_at,id) %>% summarise() %>% st_cast("LINESTRING")
-    
-    vector_list = combx
+
     
     # Calculate intersection of all vectors
     line_is = st_intersection(comb,comb)
