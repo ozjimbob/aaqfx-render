@@ -229,7 +229,7 @@ get_poly_dist = function(bbox,startTime,endTime){
   data$focx = data$lng + .2*sin(data$ang)
   data$focy = data$lat + .2*cos(data$ang)
   
-  r=raster(nrows=100,ncols=100,xmn=lng[1],xmx=lng[2],ymn=lat[1],ymx=lat[2])
+  r=raster(nrows=50,ncols=50,xmn=lng[1],xmx=lng[2],ymn=lat[1],ymx=lat[2])
   
   
   # Raster coordinate systems work from top-left not bottom left
