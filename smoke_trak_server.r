@@ -15,6 +15,13 @@ source("../config.r")
 
 md = raster("mag/D_Grid_mf_2020.grd")
 
+
+#* @filter cors
+cors <- function(res) {
+  res$setHeader("Access-Control-Allow-Origin", "*")
+  plumber::forward()
+}
+
 #* @post /get_poly
 get_poly = function(bbox,startTime,endTime){
  print(bbox) 
@@ -187,7 +194,6 @@ get_poly = function(bbox,startTime,endTime){
     return(as.geojson(out_polygon))
   }
  
- 
 #* @post /get_poly_dist
 get_poly_dist = function(bbox,startTime,endTime){
   #print(bbox) 
@@ -308,7 +314,15 @@ get_poly_dist = function(bbox,startTime,endTime){
 
 #* @post /gen_poly_dist
 gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,points,bbox){
-  print(algorithm)
+  if(nrow(points)>100){
+    return("Error: More than 100 points specified.")
+  }
+  if(!algorithm %in% c(1,2)){
+    return("Algorithm not found")
+  }
+  if(distance < 0 | distance > 150){
+    return("Invalid distance")
+  }
   # Quick convert km to degres
   distance = distance/110
   
@@ -484,7 +498,10 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
     values(trast)[values(r)>q]=2
     values(trast)[values(r)<=q1]=NA
     
-    }
+  }
+  if(all(is.na(raster::values(orast)))){
+    return("Empty raster")
+  }
   orast = rasterToPolygons(trast,dissolve=TRUE)
   orast = st_as_sf(orast, crs="+proj=aea +lat_1=-18 +lat_2=-36 +lat_0=0 +lon_0=134 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ")
   orast = st_transform(orast,crs=4326)
