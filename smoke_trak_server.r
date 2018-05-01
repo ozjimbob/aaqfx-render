@@ -9,6 +9,7 @@ library(raster) # Raster files
 library(RPostgres)
 library(DBI)
 library(geojson)
+library(smoothr)
 
 #setwd("/mnt/R")
 source("../config.r")
@@ -508,6 +509,7 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
   orast=st_buffer(orast,.000000001)
   out_polygon=orast
   if(nrow(orast)==0){return("No Polygons")}
+  out_polygon = smooth(out_polygon,  method = "chaikin")
   out_polygon = as(out_polygon,"Spatial")
   return(as.geojson(out_polygon))
 
