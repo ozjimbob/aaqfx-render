@@ -398,7 +398,7 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
     # Calculate a kernel density raster with a 3km bandwidth
     sm = smooth_map(line_is,bandwidth=2,to.Raster=TRUE,nrow=50,ncol=50)
     rast = sm[[1]]
-    
+    rastr = disaggregate(rast,2,method="bilinear")
     # Plot this raster on the map of Melbourne
     #tm_shape(comb,is.master = TRUE) + tm_lines(alpha=0) + tm_shape(rast) + tm_raster(palette="YlOrRd",title="KDE") + tm_shape(vic) + tm_borders()  + tm_shape(roads,col="black",alpha=0.5) + tm_lines() + tm_layout(title = "Intersection Kernel Density")
     
@@ -488,7 +488,7 @@ gen_poly = function(algorithm,distance=25,defaultAngle=15,defaultAccuracy=10,poi
       }
     }
     
-    
+    r = disaggregate(r,2,method="bilinear")
     q1=nrow(data)/100
     q=q1*2
     # Copy the raster
