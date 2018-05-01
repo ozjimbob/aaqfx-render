@@ -17,10 +17,10 @@ md = raster("mag/D_Grid_mf_2020.grd")
 
 
 #* @filter cors
-cors <- function(res) {
-  res$setHeader("Access-Control-Allow-Origin", "*")
-  plumber::forward()
-}
+#cors <- function(res) {
+#  res$setHeader("Access-Control-Allow-Origin", "*")
+#  plumber::forward()
+#}
 
 #* @post /get_poly
 get_poly = function(bbox,startTime,endTime){
