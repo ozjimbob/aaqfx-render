@@ -1,8 +1,11 @@
 #!/usr/bin/Rscript
-tdate = format(Sys.Date(),"%Y%m%d")
+tdate = format(Sys.Date()-1,"%Y%m%d")
 setwd("/mnt/R")
 cmd = sprintf("scp gxw581@raijin.nci.org.au:/short/en0/share/aqfx/Latest/AQFx_NCoutput_%s.tar aqfx/aqfx.tar",tdate)
-system(cmd)
+a=system(cmd)
+if(attr(a,"status")==1){
+  quit()
+}
 cmd="tar -xf aqfx/aqfx.tar -C aqfx"
 system(cmd)
 unlink("aqfx/aqfx.tar")
@@ -10,8 +13,13 @@ unlink("aqfx/aqfx.tar")
 unlink(sprintf("aqfx/aus_%sCavg.nc",tdate))
 unlink(sprintf("aqfx/se_%sCavg.nc",tdate))
 unlink(sprintf("aqfx/vtas_%sCavg.nc",tdate))
+#full_vtas = sprintf("aqfx/vtas_%sCavg.nc",tdate)
+#full_se = sprintf("aqfx/se_%sCavg.nc",tdate)
+#full_aus = sprintf("aqfx/aus_%sCavg.nc",tdate)
 
-
+#file.rename(full_vtas,"aqfx/full_vtas.nc")
+#file.rename(full_se,"aqfx/full_se.nc")
+#file.rename(full_aus,"aqfx/full_aus.nc")
 
 vtas = sprintf("aqfx/%s_PM25plus_vtas.nc",tdate)
 se = sprintf("aqfx/%s_PM25plus_se.nc",tdate)
