@@ -1,9 +1,9 @@
 #!/usr/bin/Rscript
-tdate = format(Sys.Date()-1,"%Y%m%d")
+tdate = format(Sys.Date(),"%Y%m%d")
 setwd("/mnt/R")
 cmd = sprintf("scp gxw581@raijin.nci.org.au:/short/en0/share/aqfx/Latest/AQFx_NCoutput_%s.tar aqfx/aqfx.tar",tdate)
 a=system(cmd)
-if(attr(a,"status")==1){
+if(!is.null(attr(a,"status"))){
   quit()
 }
 cmd="tar -xf aqfx/aqfx.tar -C aqfx"
