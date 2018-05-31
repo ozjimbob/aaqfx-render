@@ -1,11 +1,17 @@
 #!/usr/bin/Rscript
+
+
 tdate = format(Sys.Date(),"%Y%m%d")
 setwd("/mnt/R")
-cmd = sprintf("scp gxw581@raijin.nci.org.au:/short/en0/share/aqfx/Latest/AQFx_NCoutput_%s.tar aqfx/aqfx.tar",tdate)
-a=system(cmd)
-if(!is.null(attr(a,"status"))){
-  quit()
+a=1
+while(a==1){
+  cmd = sprintf("scp gxw581@raijin.nci.org.au:/short/en0/share/aqfx/Latest/AQFx_NCoutput_%s.tar aqfx/aqfx.tar",tdate)
+  a=system(cmd)
+  Sys.sleep(10*60)
+  
 }
+
+
 cmd="tar -xf aqfx/aqfx.tar -C aqfx"
 system(cmd)
 unlink("aqfx/aqfx.tar")

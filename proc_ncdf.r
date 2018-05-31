@@ -119,6 +119,10 @@ datLevo = cube_met(data,"Levo")[,,1:24]
 datAOD = cube_met(data,"AOD")[,,1:24]
 
 
+
+
+
+
 times = 0:23
 tdate = Sys.Date()
 year = as.numeric(format(tdate,"%Y"))
