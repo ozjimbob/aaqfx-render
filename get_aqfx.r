@@ -9,7 +9,7 @@ while(a==1){
   cmd = sprintf("scp gxw581@raijin.nci.org.au:/short/en0/share/aqfx/Latest/AQFx_NCoutput_%s.tar aqfx/aqfx.tar",tdate)
   a=system(cmd)
   cnt = cnt + 1
-  if(cnt = 6 * 12){
+  if(cnt == 6 * 12){
     quit()
   }
   if(a==0){
