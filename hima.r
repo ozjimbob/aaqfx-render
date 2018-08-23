@@ -17,21 +17,33 @@ date = paste0(format(ttime,"%Y%m%d%H"),last10)
 
 working = "hima/"
 # download sub-files
-url_root = sprintf("ftp://ftp-reg.cloud.bom.gov.au/gms/IDE00218.%s.nc",date)
-fn = getBinaryURL(url_root,userpwd=bompwd)
-writeBin(fn, paste0(working,"bandb.nc"))
 
-url_root = sprintf("ftp://ftp-reg.cloud.bom.gov.au/gms/IDE00219.%s.nc",date)
-fn = getBinaryURL(url_root,userpwd=bompwd)
-writeBin(fn, paste0(working,"bandg.nc"))
+#/g/data/er8/data/ingest/ahi_ide
 
-url_root = sprintf("ftp://ftp-reg.cloud.bom.gov.au/gms/IDE00220.%s.nc",date)
-fn = getBinaryURL(url_root,userpwd=bompwd)
-writeBin(fn, paste0(working,"bandr.nc"))
+cmd = sprintf("scp gxw581@raijin.nci.org.au:/g/data/er8/data/ingest/ahi_ide/IDE00218.%s.nc hima/bandb.nc",date)
+a=system(cmd)
+#url_root = sprintf("ftp://ftp-reg.cloud.bom.gov.au/gms/IDE00218.%s.nc",date)
+#fn = getBinaryURL(url_root,userpwd=bompwd)
+#writeBin(fn, paste0(working,"bandb.nc"))
 
-url_root = sprintf("ftp://ftp-reg.cloud.bom.gov.au/gms/IDE00221.%s.nc",date)
-fn = getBinaryURL(url_root,userpwd=bompwd)
-writeBin(fn, paste0(working,"bandir.nc"))
+cmd = sprintf("scp gxw581@raijin.nci.org.au:/g/data/er8/data/ingest/ahi_ide/IDE00219.%s.nc hima/bandg.nc",date)
+a=system(cmd)
+#url_root = sprintf("ftp://ftp-reg.cloud.bom.gov.au/gms/IDE00219.%s.nc",date)
+#fn = getBinaryURL(url_root,userpwd=bompwd)
+#writeBin(fn, paste0(working,"bandg.nc"))
+cmd = sprintf("scp gxw581@raijin.nci.org.au:/g/data/er8/data/ingest/ahi_ide/IDE00220.%s.nc hima/bandr.nc",date)
+a=system(cmd)
+
+#url_root = sprintf("ftp://ftp-reg.cloud.bom.gov.au/gms/IDE00220.%s.nc",date)
+#fn = getBinaryURL(url_root,userpwd=bompwd)
+#writeBin(fn, paste0(working,"bandr.nc"))
+
+cmd = sprintf("scp gxw581@raijin.nci.org.au:/g/data/er8/data/ingest/ahi_ide/IDE00221.%s.nc hima/bandir.nc",date)
+a=system(cmd)
+
+#url_root = sprintf("ftp://ftp-reg.cloud.bom.gov.au/gms/IDE00221.%s.nc",date)
+#fn = getBinaryURL(url_root,userpwd=bompwd)
+#writeBin(fn, paste0(working,"bandir.nc"))
 
 run1 = sprintf('%sgdal_translate -a_srs "+proj=geos +h=35785863 +a=6378137.0 +b=6356752.3 +lon_0=140.7 +no_defs" -a_ullr -5500000 5500000 5500000 -5500000 %sbandb.nc %stemp.tif',exeroot,working,working)
 run2 = sprintf('%sgdalwarp -overwrite -r cubic -t_srs "+proj=latlong +ellps=WGS84" -wo SOURCE_EXTRA=100 %stemp.tif -te 139 -44 153 -33 %sbandb.tif',exeroot,working,working)
