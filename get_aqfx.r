@@ -1,13 +1,16 @@
 #!/usr/bin/Rscript
 
 
-tdate = format(Sys.Date(),"%Y%m%d")
+tdate = format(Sys.Date()-1,"%Y%m%d")
 setwd("/mnt/R")
 a=1
 cnt = 1
 while(a==1){
+  
   cmd = sprintf("scp gxw581@raijin.nci.org.au:/short/en0/share/aqfx/Latest/AQFx_NCoutput_%s.tar aqfx/aqfx.tar",tdate)
+  try({
   a=system(cmd)
+  })
   cnt = cnt + 1
   if(cnt == 6 * 12){
     quit()
